@@ -112,5 +112,19 @@ const api = {
 
     // Admin - Stats & Messages
     getAdminStats: async () => { const res = await fetch(`${API_BASE}/admin/stats`, { headers: getHeaders() }); return res.json(); },
+    getAdminOrders: async () => { const res = await fetch(`${API_BASE}/admin/orders`, { headers: getHeaders() }); return res.json(); },
+    updateAdminOrderStatus: async (id, status) => {
+        const res = await fetch(`${API_BASE}/admin/orders/${id}/status`, { method: 'PATCH', headers: getHeaders(), body: JSON.stringify({ status }) });
+        const text = await res.text();
+        try { return JSON.parse(text); }
+        catch (e) { return { success: false, message: res.status === 404 ? 'Backend route not loaded. Restart npm start.' : (text || 'Update failed') }; }
+    },
+    getAdminBookings: async () => { const res = await fetch(`${API_BASE}/admin/bookings`, { headers: getHeaders() }); return res.json(); },
+    updateAdminBookingStatus: async (id, status) => {
+        const res = await fetch(`${API_BASE}/admin/bookings/${id}/status`, { method: 'PATCH', headers: getHeaders(), body: JSON.stringify({ status }) });
+        const text = await res.text();
+        try { return JSON.parse(text); }
+        catch (e) { return { success: false, message: res.status === 404 ? 'Backend route not loaded. Restart npm start.' : (text || 'Update failed') }; }
+    },
     getAdminMessages: async () => { const res = await fetch(`${API_BASE}/admin/messages`, { headers: getHeaders() }); return res.json(); }
 };

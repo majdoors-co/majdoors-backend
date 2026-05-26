@@ -5,6 +5,8 @@ let cart = JSON.parse(localStorage.getItem('mj_cart')) || [];
 let workers = [];
 let products = [];
 let slides = [];
+let adminBookings = [];
+let adminOrders = [];
 let notifications = [];
 let socket;
 
@@ -22,9 +24,9 @@ async function loadComponent(elementId, componentPath) {
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Load shared components
     await Promise.all([
-        loadComponent('navbar-container', 'components/navbar.html?v=10'),
-        loadComponent('modals-container', 'components/modals.html?v=10'),
-        loadComponent('footer-container', 'components/footer.html?v=10')
+        loadComponent('navbar-container', 'components/navbar.html?v=15'),
+        loadComponent('modals-container', 'components/modals.html?v=15'),
+        loadComponent('footer-container', 'components/footer.html?v=15')
     ]);
 
     document.body.style.display = 'block';
@@ -47,6 +49,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             workers = updatedWorkers;
             if (typeof renderServicesPage === 'function') renderServicesPage();
             if (typeof renderAdmin === 'function') renderAdmin();
+        });
+        socket.on('newBooking', async () => {
+            if (isAdmin && typeof loadAdminBookings === 'function') {
+                await loadAdminBookings();
+                if (typeof fetchAdminStats === 'function') fetchAdminStats();
+                if (typeof showToast === 'function') showToast('New booking received', 'info');
+            }
+        });
+        socket.on('newOrder', async () => {
+            if (isAdmin && typeof loadAdminOrders === 'function') {
+                await loadAdminOrders();
+                if (typeof fetchAdminStats === 'function') fetchAdminStats();
+                if (typeof showToast === 'function') showToast('New order received', 'info');
+            }
+        });
+        socket.on('orderStatusUpdate', (order) => {
+            if (currentUser && typeof renderOrdersPage === 'function' && document.querySelector('main')?.dataset.page === 'orders') {
+                renderOrdersPage();
+            }
+            if (isAdmin && order && typeof renderAdminOrders === 'function') {
+                const idx = adminOrders.findIndex(o => (o._id || o.id) === (order._id || order.id));
+                if (idx >= 0) adminOrders[idx] = order;
+                renderAdminOrders();
+            }
+        });
+        socket.on('bookingStatusUpdate', (booking) => {
+            if (currentUser && typeof renderBookingsPage === 'function' && document.querySelector('main')?.dataset.page === 'bookings') {
+                renderBookingsPage();
+            }
+            if (isAdmin && booking && typeof renderAdminBookings === 'function') {
+                const idx = adminBookings.findIndex(b => (b._id || b.id) === (booking._id || booking.id));
+                if (idx >= 0) adminBookings[idx] = booking;
+                renderAdminBookings();
+            }
         });
     } catch(e) { console.error('Socket.io connection failed', e); }
 

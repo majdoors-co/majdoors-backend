@@ -41,6 +41,18 @@
 <div class="dashboard-card p-5"><div class="flex items-center gap-3"><div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center"><i class="fas fa-chart-line text-purple-500 text-xl"></i></div><div><p class="text-2xl font-bold" id="adminBookingCount">0</p><p class="text-xs text-gray-500">Bookings</p></div></div></div>
 </div>
 
+<!-- Recent Bookings -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+<div class="flex justify-between items-center gap-3 mb-5"><h3 class="font-bold text-lg"><i class="fas fa-calendar-check text-orange"></i> Recent Bookings</h3><button onclick="loadAdminBookings()" class="btn-outline px-4 py-2 text-sm"><i class="fas fa-rotate"></i> Refresh</button></div>
+<div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>Customer</th><th>Phone</th><th>Worker</th><th>Date / Time</th><th>Location</th><th>Status</th><th>Note</th><th>Actions</th></tr></thead><tbody id="adminBookingTable"></tbody></table></div>
+</div>
+
+<!-- Recent Orders -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+<div class="flex justify-between items-center gap-3 mb-5"><h3 class="font-bold text-lg"><i class="fas fa-cart-shopping text-green-500"></i> Recent Orders</h3><button onclick="loadAdminOrders()" class="btn-outline px-4 py-2 text-sm"><i class="fas fa-rotate"></i> Refresh</button></div>
+<div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Products</th><th>Qty</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminOrderTable"></tbody></table></div>
+</div>
+
 <!-- Product Management -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
 <div class="flex justify-between items-center mb-5"><h3 class="font-bold text-lg"><i class="fas fa-boxes text-orange"></i> Product Management</h3><button onclick="openModal('addProductModal')" class="btn-primary px-4 py-2 text-sm">+ Add Product</button></div>
@@ -62,9 +74,9 @@
 
     </main>
     <div id="footer-container"></div>
-    <script src="js/api.js?v=10"></script>
-    <script src="js/main.js?v=10"></script>
-    <script src="js/app.js?v=10"></script>
-    <script src="js/pages.js?v=10"></script>
+    <script src="js/api.js?v=15"></script>
+    <script src="js/main.js?v=15"></script>
+    <script src="js/app.js?v=15"></script>
+    <script src="js/pages.js?v=15"></script>
 </body>
 </html>

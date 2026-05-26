@@ -47,11 +47,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'majdoors_secure_jwt_key_2026_produ
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/majdoors', {
-            serverSelectionTimeoutMS: 3000
+            serverSelectionTimeoutMS: 15000
         });
         console.log('✅ MongoDB Connected successfully!');
     } catch (err) {
-        console.warn('\n⚠️ Local MongoDB not found! Starting In-Memory MongoDB Server...');
+        console.warn('\nMongoDB connection failed:', err.message);
+        console.warn('Starting In-Memory MongoDB Server as a temporary fallback...');
         try {
             const { MongoMemoryServer } = require('mongodb-memory-server');
             const mongoServer = await MongoMemoryServer.create();
@@ -329,6 +330,7 @@ app.post('/api/orders', protect, async (req, res) => {
     try {
         const { items, totalAmount, shippingAddress, paymentMethod } = req.body;
         const order = await Order.create({ user: req.user._id, items, totalAmount, shippingAddress, paymentMethod });
+        io.emit('newOrder', order);
         res.status(201).json({ success: true, order });
     } catch (err) { res.status(400).json({ success: false, message: err.message }); }
 });
@@ -346,7 +348,24 @@ app.get('/api/orders', protect, async (req, res) => {
 app.post('/api/bookings', protect, async (req, res) => {
     try {
         const { worker, workerName, workerRole, date, timeSlot, description } = req.body;
-        const booking = await Booking.create({ user: req.user._id, worker, workerName, workerRole, date, timeSlot, description });
+        const customerName = req.body.customerName || req.body.name;
+        const customerPhone = req.body.customerPhone || req.body.phone;
+        const customerLocation = req.body.customerLocation || req.body.location || req.body.address || req.body.workLocation;
+        if (!customerName || !customerPhone || !customerLocation || !date || !timeSlot) {
+            return res.status(400).json({ success: false, message: 'Name, phone, location, date and time slot are required' });
+        }
+        const booking = await Booking.create({
+            user: req.user._id,
+            worker,
+            workerName,
+            workerRole,
+            customerName: customerName.trim(),
+            customerPhone: customerPhone.trim(),
+            customerLocation: customerLocation.trim(),
+            date,
+            timeSlot,
+            description
+        });
         io.emit('newBooking', booking);
         res.status(201).json({ success: true, booking });
     } catch (err) { res.status(400).json({ success: false, message: err.message }); }
@@ -462,16 +481,48 @@ app.get('/api/admin/stats', protect, admin, async (req, res) => {
 
 app.get('/api/admin/orders', protect, admin, async (req, res) => {
     try {
-        const orders = await Order.find({}).populate('user', 'name email').sort({ createdAt: -1 });
+        const orders = await Order.find({}).populate('user', 'name email phone').sort({ createdAt: -1 });
         res.json(orders);
     } catch (err) { res.status(500).json({ message: 'Server error' }); }
 });
 
+app.patch('/api/admin/orders/:id/status', protect, admin, async (req, res) => {
+    try {
+        const allowed = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
+        if (!allowed.includes(req.body.status)) {
+            return res.status(400).json({ success: false, message: 'Invalid order status' });
+        }
+        const order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true })
+            .populate('user', 'name email phone');
+        if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+        io.emit('orderStatusUpdate', order);
+        res.json({ success: true, order });
+    } catch (err) { res.status(500).json({ success: false, message: 'Server error' }); }
+});
+
 app.get('/api/admin/bookings', protect, admin, async (req, res) => {
     try {
-        const bookings = await Booking.find({}).populate('user', 'name email').sort({ createdAt: -1 });
+        const bookings = await Booking.find({})
+            .populate('user', 'name email phone')
+            .populate('worker', 'name role phone')
+            .sort({ createdAt: -1 });
         res.json(bookings);
     } catch (err) { res.status(500).json({ message: 'Server error' }); }
+});
+
+app.patch('/api/admin/bookings/:id/status', protect, admin, async (req, res) => {
+    try {
+        const allowed = ['Pending', 'Confirmed', 'Completed', 'Cancelled'];
+        if (!allowed.includes(req.body.status)) {
+            return res.status(400).json({ success: false, message: 'Invalid booking status' });
+        }
+        const booking = await Booking.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true })
+            .populate('user', 'name email phone')
+            .populate('worker', 'name role phone');
+        if (!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
+        io.emit('bookingStatusUpdate', booking);
+        res.json({ success: true, booking });
+    } catch (err) { res.status(500).json({ success: false, message: 'Server error' }); }
 });
 
 app.get('/api/admin/messages', protect, admin, async (req, res) => {

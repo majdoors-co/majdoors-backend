@@ -66,93 +66,109 @@
         <!-- Services + Mart Cards -->
         <div class="max-w-7xl mx-auto px-6 -mt-16 relative z-20 reveal">
             <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-white rounded-3xl shadow-2xl p-7 transition-all hover:shadow-orange-200/40 cursor-pointer border border-gray-50 group"
+                <div class="bg-gradient-to-br from-sky-50 via-white to-emerald-50 rounded-3xl shadow-2xl p-7 transition-all hover:shadow-sky-200/60 cursor-pointer border border-sky-100 group relative overflow-hidden"
                     onclick="window.location.href='services.html'">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-sky-100/60 rounded-bl-full"></div>
                     <div class="flex justify-between items-start">
-                        <div>
-                            <div class="w-20 h-20 bg-orange-50 rounded-2xl flex items-center justify-center mb-4"><i
-                                    class="fas fa-hard-hat text-5xl text-orange"></i></div>
-                            <h2 class="text-2xl font-bold">Services</h2>
-                            <p class="text-gray-500 mt-1">Expert plumbers, electricians, labor & more.</p>
+                        <div class="relative">
+                            <div class="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold mb-4">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Live worker availability
+                            </div>
+                            <div class="w-20 h-20 bg-sky-100 rounded-2xl flex items-center justify-center mb-4"><i
+                                    class="fas fa-hard-hat text-5xl text-sky-600"></i></div>
+                            <h2 class="text-2xl font-bold">Book Skilled Workers</h2>
+                            <p class="text-gray-600 mt-1">Find nearby plumbers, electricians, cleaning and installation professionals by location.</p>
+                            <div class="flex flex-wrap gap-2 mt-3 text-xs font-semibold">
+                                <span class="bg-white/80 border border-sky-100 text-sky-700 px-3 py-1 rounded-full"><i class="fas fa-location-dot"></i> Near your site</span>
+                                <span class="bg-white/80 border border-emerald-100 text-emerald-700 px-3 py-1 rounded-full"><i class="fas fa-clock"></i> Book a time slot</span>
+                            </div>
                         </div><i
-                            class="fas fa-arrow-right text-orange text-xl group-hover:translate-x-1 transition-transform"></i>
+                            class="fas fa-arrow-right text-sky-600 text-xl group-hover:translate-x-1 transition-transform relative"></i>
                     </div>
                     <div class="grid grid-cols-3 gap-3 mt-5">
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-white/80 p-3 rounded-xl text-center hover:bg-sky-100 transition cursor-pointer border border-sky-50"
                             onclick="event.stopPropagation();window.location.href='services.html?role=Electrician'">
-                            <i class="fas fa-bolt text-orange"></i>
+                            <i class="fas fa-bolt text-sky-600"></i>
                             <p class="text-xs font-medium mt-1">Electrician</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-white/80 p-3 rounded-xl text-center hover:bg-sky-100 transition cursor-pointer border border-sky-50"
                             onclick="event.stopPropagation();window.location.href='services.html?role=Plumber'">
-                            <i class="fas fa-wrench text-orange"></i>
+                            <i class="fas fa-wrench text-sky-600"></i>
                             <p class="text-xs font-medium mt-1">Plumber</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
-                            onclick="event.stopPropagation();window.location.href='services.html?role=Labor'">
-                            <i class="fas fa-hard-hat text-orange"></i>
-                            <p class="text-xs font-medium mt-1">Labor</p>
+                        <div class="bg-white/80 p-3 rounded-xl text-center hover:bg-sky-100 transition cursor-pointer border border-sky-50"
+                            onclick="event.stopPropagation();window.location.href='services.html?role=Home Cleaning'">
+                            <i class="fas fa-broom text-sky-600"></i>
+                            <p class="text-xs font-medium mt-1">Home Cleaning</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-white/80 p-3 rounded-xl text-center hover:bg-sky-100 transition cursor-pointer border border-sky-50"
                             onclick="event.stopPropagation();window.location.href='services.html?role=Carpenter'">
-                            <i class="fas fa-hammer text-orange"></i>
+                            <i class="fas fa-hammer text-sky-600"></i>
                             <p class="text-xs font-medium mt-1">Carpenter</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-white/80 p-3 rounded-xl text-center hover:bg-sky-100 transition cursor-pointer border border-sky-50"
                             onclick="event.stopPropagation();window.location.href='services.html?role=Painter'">
-                            <i class="fas fa-paint-roller text-orange"></i>
+                            <i class="fas fa-paint-roller text-sky-600"></i>
                             <p class="text-xs font-medium mt-1">Painter</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
-                            onclick="event.stopPropagation();window.location.href='services.html?role=Welder'">
-                            <i class="fas fa-fire text-orange"></i>
-                            <p class="text-xs font-medium mt-1">Welder</p>
+                        <div class="bg-white/80 p-3 rounded-xl text-center hover:bg-sky-100 transition cursor-pointer border border-sky-50"
+                            onclick="event.stopPropagation();window.location.href='services.html?role=Home Installation'">
+                            <i class="fas fa-screwdriver-wrench text-sky-600"></i>
+                            <p class="text-xs font-medium mt-1">Home Installation</p>
                         </div>
                     </div>
                     <button
-                        class="mt-6 w-full py-2.5 border-2 border-orange text-orange rounded-full hover:bg-orange hover:text-white transition font-semibold text-sm"
-                        onclick="event.stopPropagation();window.location.href='services.html'">Explore All Services
+                        class="mt-6 w-full py-2.5 border-2 border-sky-600 text-sky-700 rounded-full hover:bg-sky-600 hover:text-white transition font-semibold text-sm"
+                        onclick="event.stopPropagation();window.location.href='services.html'">Find Available Workers
                         &rarr;</button>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-2xl p-7 transition-all hover:shadow-orange-200/40 cursor-pointer border border-gray-50 group"
+                <div class="bg-white rounded-3xl shadow-2xl p-7 transition-all hover:shadow-orange-200/50 cursor-pointer border border-orange-100 group relative overflow-hidden"
                     onclick="window.location.href='mart.html'">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full"></div>
                     <div class="flex justify-between items-start">
-                        <div>
+                        <div class="relative">
+                            <div class="inline-flex items-center gap-2 bg-orange-100 text-orange px-3 py-1 rounded-full text-xs font-bold mb-4">
+                                <i class="fas fa-cart-shopping"></i> Materials store
+                            </div>
                             <div class="w-20 h-20 bg-orange-50 rounded-2xl flex items-center justify-center mb-4"><i
                                     class="fas fa-store text-5xl text-orange"></i></div>
-                            <h2 class="text-2xl font-bold">Majdoors Mart</h2>
-                            <p class="text-gray-500 mt-1">Quality construction materials at best prices.</p>
+                            <h2 class="text-2xl font-bold">Order Building Materials</h2>
+                            <p class="text-gray-600 mt-1">Shop electrical, plumbing, hardware, paints and flooring products.</p>
+                            <div class="flex flex-wrap gap-2 mt-3 text-xs font-semibold">
+                                <span class="bg-orange-50 border border-orange-100 text-orange px-3 py-1 rounded-full"><i class="fas fa-box"></i> Stock & prices</span>
+                                <span class="bg-orange-50 border border-orange-100 text-orange px-3 py-1 rounded-full"><i class="fas fa-truck"></i> Material delivery</span>
+                            </div>
                         </div><i
-                            class="fas fa-arrow-right text-orange text-xl group-hover:translate-x-1 transition-transform"></i>
+                            class="fas fa-arrow-right text-orange text-xl group-hover:translate-x-1 transition-transform relative"></i>
                     </div>
                     <div class="grid grid-cols-3 gap-3 mt-5">
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-orange-50/70 p-3 rounded-xl text-center hover:bg-orange-100 transition cursor-pointer border border-orange-100"
                             onclick="event.stopPropagation();window.location.href='mart.html?cat=electrical'">
                             <i class="fas fa-plug text-orange"></i>
                             <p class="text-xs font-medium mt-1">Electrical</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-orange-50/70 p-3 rounded-xl text-center hover:bg-orange-100 transition cursor-pointer border border-orange-100"
                             onclick="event.stopPropagation();window.location.href='mart.html?cat=plumbing'">
                             <i class="fas fa-water text-orange"></i>
                             <p class="text-xs font-medium mt-1">Plumbing</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-orange-50/70 p-3 rounded-xl text-center hover:bg-orange-100 transition cursor-pointer border border-orange-100"
                             onclick="event.stopPropagation();window.location.href='mart.html?cat=hardware'">
                             <i class="fas fa-border-all text-orange"></i>
                             <p class="text-xs font-medium mt-1">Hardware</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-orange-50/70 p-3 rounded-xl text-center hover:bg-orange-100 transition cursor-pointer border border-orange-100"
                             onclick="event.stopPropagation();window.location.href='mart.html?cat=construction'">
                             <i class="fas fa-charging-station text-orange"></i>
                             <p class="text-xs font-medium mt-1">Construction</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-orange-50/70 p-3 rounded-xl text-center hover:bg-orange-100 transition cursor-pointer border border-orange-100"
                             onclick="event.stopPropagation();window.location.href='mart.html?cat=flooring'">
                             <i class="fas fa-th-large text-orange"></i>
                             <p class="text-xs font-medium mt-1">Flooring</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-xl text-center hover:bg-orange-50 transition cursor-pointer"
+                        <div class="bg-orange-50/70 p-3 rounded-xl text-center hover:bg-orange-100 transition cursor-pointer border border-orange-100"
                             onclick="event.stopPropagation();window.location.href='mart.html?cat=paints'">
                             <i class="fas fa-paint-roller text-orange"></i>
                             <p class="text-xs font-medium mt-1">Paints</p>
@@ -160,7 +176,7 @@
                     </div>
                     <button
                         class="mt-6 w-full py-2.5 border-2 border-orange text-orange rounded-full hover:bg-orange hover:text-white transition font-semibold text-sm"
-                        onclick="event.stopPropagation();window.location.href='mart.html'">Shop Mart &rarr;</button>
+                        onclick="event.stopPropagation();window.location.href='mart.html'">Shop Materials &rarr;</button>
                 </div>
             </div>
         </div>
@@ -283,10 +299,10 @@
 
     </main>
     <div id="footer-container"></div>
-    <script src="js/api.js?v=10"></script>
-    <script src="js/main.js?v=10"></script>
-    <script src="js/app.js?v=10"></script>
-    <script src="js/pages.js?v=10"></script>
+    <script src="js/api.js?v=15"></script>
+    <script src="js/main.js?v=15"></script>
+    <script src="js/app.js?v=15"></script>
+    <script src="js/pages.js?v=15"></script>
 </body>
 
 </html>

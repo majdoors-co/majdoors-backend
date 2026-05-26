@@ -70,6 +70,9 @@
 <h3 class="font-bold text-xl flex items-center gap-2"><i class="fas fa-calendar-check text-orange"></i> Book Service</h3>
 <p id="modalWorkerName" class="mt-3 text-gray-600"></p>
 <div class="space-y-3 mt-4">
+<input type="text" id="bookingCustomerName" placeholder="Your full name" class="border border-gray-200 w-full p-3 rounded-xl focus:outline-none focus:border-orange-400">
+<input type="tel" id="bookingCustomerPhone" placeholder="Phone number" class="border border-gray-200 w-full p-3 rounded-xl focus:outline-none focus:border-orange-400">
+<input type="text" id="bookingCustomerLocation" placeholder="Work location / address" class="border border-gray-200 w-full p-3 rounded-xl focus:outline-none focus:border-orange-400">
 <input type="date" id="bookingDate" class="border border-gray-200 w-full p-3 rounded-xl focus:outline-none focus:border-orange-400">
 <select id="bookingSlot" class="border border-gray-200 w-full p-3 rounded-xl focus:outline-none focus:border-orange-400"><option>09:00 AM - 11:00 AM</option><option>11:00 AM - 1:00 PM</option><option>2:00 PM - 4:00 PM</option><option>4:00 PM - 6:00 PM</option></select>
 <textarea id="bookingDesc" placeholder="Describe your requirement..." class="border border-gray-200 w-full p-3 rounded-xl focus:outline-none focus:border-orange-400 h-20 resize-none"></textarea>
@@ -169,7 +172,7 @@
     </div>
 </div>
 <input type="text" id="newWorkerName" placeholder="Worker Name" class="w-full border border-gray-200 rounded-xl py-3 px-4">
-<select id="newWorkerRole" class="w-full border border-gray-200 rounded-xl py-3 px-4"><option>Electrician</option><option>Plumber</option><option>Labor</option><option>Carpenter</option><option>Painter</option><option>Welder</option><option>Mason</option><option>AC Technician</option></select>
+<select id="newWorkerRole" class="w-full border border-gray-200 rounded-xl py-3 px-4"><option>Electrician</option><option>Plumber</option><option>Home Cleaning</option><option>Carpenter</option><option>Painter</option><option>Home Installation</option><option>Mason</option><option>AC Technician</option></select>
 <input type="text" id="newWorkerExp" placeholder="Experience (e.g. 5 yrs)" class="w-full border border-gray-200 rounded-xl py-3 px-4">
 <input type="text" id="newWorkerCity" placeholder="City" class="w-full border border-gray-200 rounded-xl py-3 px-4">
 <input type="text" id="newWorkerPrice" placeholder="Rate (e.g. ₹399/hr)" class="w-full border border-gray-200 rounded-xl py-3 px-4">
