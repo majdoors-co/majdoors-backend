@@ -18,7 +18,14 @@ const orderSchema = new mongoose.Schema({
         pinCode: String
     },
     paymentMethod: { type: String, enum: ['cod', 'upi', 'card', 'netbanking'], default: 'cod' },
-    status: { type: String, enum: ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'], default: 'Pending' }
+    status: { type: String, enum: ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'], default: 'Pending' },
+    review: {
+        rating: { type: Number, min: 1, max: 5 },
+        text: { type: String, trim: true, default: '' },
+        images: [{ type: String }],
+        reviewedAt: Date,
+        isPublic: { type: Boolean, default: false }
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

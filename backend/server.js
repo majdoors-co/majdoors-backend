@@ -32,12 +32,58 @@ const Booking = require('./models/Booking');
 const Category = require('./models/Category');
 const ContactMessage = require('./models/ContactMessage');
 const Slide = require('./models/Slide');
+const InteriorCategory = require('./models/InteriorCategory');
 const { protect, admin } = require('./middleware/auth');
+
+const defaultInteriorCategories = [
+    { name: 'Wardrobe Design', slug: 'wardrobe-design', icon: 'fas fa-door-closed', description: 'Sliding, hinged and premium storage ideas for bedrooms.', coverImage: 'img/interior_option_1.png', images: ['img/interior_option_1.png', 'img/interior_option_2.png', 'img/interior_option_3.png'], sortOrder: 1, isActive: true },
+    { name: 'Modular Kitchen', slug: 'modular-kitchen', icon: 'fas fa-utensils', description: 'Smart kitchen layouts, cabinets and utility-focused finishes.', coverImage: 'img/slider_interior.png', images: ['img/slider_interior.png', 'img/interior_offer.png', 'img/interior_option_2.png'], sortOrder: 2, isActive: true },
+    { name: 'False Ceiling', slug: 'false-ceiling', icon: 'fas fa-border-top-left', description: 'Modern ceiling concepts with lighting and clean detailing.', coverImage: 'img/interior_offer.png', images: ['img/interior_offer.png', 'img/interior_option_3.png', 'img/slider_interior.png'], sortOrder: 3, isActive: true },
+    { name: 'Living Room Design', slug: 'living-room-design', icon: 'fas fa-couch', description: 'TV units, wall panels, storage and seating inspiration.', coverImage: 'img/interior_option_2.png', images: ['img/interior_option_2.png', 'img/interior_option_1.png', 'img/interior_offer.png'], sortOrder: 4, isActive: true },
+    { name: 'Bedroom Interior', slug: 'bedroom-interior', icon: 'fas fa-bed', description: 'Calm bedroom layouts with wardrobes, panels and lighting.', coverImage: 'img/interior_option_3.png', images: ['img/interior_option_3.png', 'img/interior_option_1.png', 'img/slider_interior.png'], sortOrder: 5, isActive: true },
+    { name: 'Bathroom Vanity', slug: 'bathroom-vanity', icon: 'fas fa-sink', description: 'Compact vanity, mirror and storage ideas for bathrooms.', coverImage: 'img/interior_offer.png', images: ['img/interior_offer.png', 'img/interior_option_2.png'], sortOrder: 6, isActive: true }
+];
+
+async function ensureDefaultInteriors() {
+    try {
+        const existing = await InteriorCategory.find({
+            slug: { $in: defaultInteriorCategories.map(category => category.slug) }
+        }).select('slug name coverImage').lean();
+        const existingBySlug = new Map(existing.map(category => [category.slug, category]));
+        await Promise.all(defaultInteriorCategories.map(category => {
+            const saved = existingBySlug.get(category.slug);
+            if (!saved) {
+                return InteriorCategory.create(category);
+            }
+            if (!saved.name || !saved.coverImage) {
+                return InteriorCategory.updateOne({ slug: category.slug }, { $set: category });
+            }
+            return Promise.resolve();
+        }));
+    } catch (err) {
+        if (err.code !== 11000) throw err;
+    }
+}
 
 const app = express();
 const server = http.createServer(app);
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+const corsOptions = {
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
 const io = new Server(server, {
-    cors: { origin: process.env.ALLOWED_ORIGINS || '*', methods: ['GET', 'POST'] }
+    cors: { origin: allowedOrigins.length ? allowedOrigins : '*', methods: ['GET', 'POST'] }
 });
 
 const PORT = process.env.PORT || 3000;
@@ -45,14 +91,24 @@ const JWT_SECRET = process.env.JWT_SECRET || 'majdoors_secure_jwt_key_2026_produ
 
 // ===== DATABASE CONNECTION =====
 const connectDB = async () => {
+    const mongoUri = process.env.MONGO_URI || (process.env.NODE_ENV === 'production' ? null : 'mongodb://127.0.0.1:27017/majdoors');
+    if (!mongoUri) {
+        throw new Error('MONGO_URI is required in production');
+    }
+
     try {
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/majdoors', {
-            serverSelectionTimeoutMS: 15000
+        await mongoose.connect(mongoUri, {
+            serverSelectionTimeoutMS: 30000,
+            socketTimeoutMS: 45000
         });
         console.log('✅ MongoDB Connected successfully!');
     } catch (err) {
+        if (process.env.NODE_ENV === 'production') {
+            throw err;
+        }
+
         console.warn('\nMongoDB connection failed:', err.message);
-        console.warn('Starting In-Memory MongoDB Server as a temporary fallback...');
+        console.warn('Starting In-Memory MongoDB Server as a temporary local fallback...');
         try {
             const { MongoMemoryServer } = require('mongodb-memory-server');
             const mongoServer = await MongoMemoryServer.create();
@@ -60,15 +116,35 @@ const connectDB = async () => {
             console.log('✅ In-Memory MongoDB running');
             require('./seed_memory');
         } catch(memErr) {
-            console.error('❌ Failed to start MongoDB:', memErr.message);
+            throw memErr;
         }
     }
 };
-connectDB();
 
-app.use(cors());
+mongoose.connection.on('disconnected', () => console.warn('MongoDB disconnected'));
+mongoose.connection.on('reconnected', () => console.log('MongoDB reconnected'));
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '../frontend')));
+
+app.get('/api/health', (req, res) => {
+    const dbConnected = mongoose.connection.readyState === 1;
+    res.status(dbConnected ? 200 : 503).json({
+        success: dbConnected,
+        status: dbConnected ? 'ok' : 'database_unavailable'
+    });
+});
+
+app.use('/api', (req, res, next) => {
+    if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({
+            success: false,
+            message: 'Database is reconnecting. Please try again in a few seconds.'
+        });
+    }
+    next();
+});
 
 // ===== HELPERS =====
 const generateToken = (id) => jwt.sign({ id }, JWT_SECRET, { expiresIn: '30d' });
@@ -236,6 +312,12 @@ app.post('/api/upload-multiple', protect, admin, upload.array('images', 5), (req
     res.json({ success: true, imageUrls });
 });
 
+app.post('/api/review-upload', protect, upload.array('images', 3), (req, res) => {
+    if (!req.files || !req.files.length) return res.status(400).json({ success: false, message: 'No images uploaded' });
+    const imageUrls = req.files.map(f => '/uploads/' + f.filename);
+    res.json({ success: true, imageUrls });
+});
+
 // ===============================================
 // PUBLIC ROUTES
 // ===============================================
@@ -270,6 +352,54 @@ app.get('/api/categories', async (req, res) => {
     catch (err) { res.status(500).json({ message: 'Server error' }); }
 });
 
+app.get('/api/interiors', async (req, res) => {
+    try {
+        await ensureDefaultInteriors();
+        const interiors = await InteriorCategory.find({ isActive: true }).sort({ sortOrder: 1, createdAt: -1 });
+        res.json(interiors);
+    } catch (err) { res.status(500).json({ message: 'Server error' }); }
+});
+
+app.get('/api/reviews/public', async (req, res) => {
+    try {
+        const [orders, bookings] = await Promise.all([
+            Order.find({ 'review.reviewedAt': { $exists: true }, 'review.isPublic': true })
+                .populate('user', 'name email')
+                .sort({ 'review.reviewedAt': -1 })
+                .limit(12)
+                .lean(),
+            Booking.find({ 'review.reviewedAt': { $exists: true }, 'review.isPublic': true })
+                .populate('user', 'name email')
+                .sort({ 'review.reviewedAt': -1 })
+                .limit(12)
+                .lean()
+        ]);
+        const reviews = [
+            ...orders.map(order => ({
+                id: order._id,
+                type: 'order',
+                customerName: order.shippingAddress?.name || order.user?.name || 'Customer',
+                title: (order.items || []).map(item => item.name).filter(Boolean).join(', ') || 'Material Order',
+                rating: order.review.rating,
+                text: order.review.text,
+                images: order.review.images || [],
+                reviewedAt: order.review.reviewedAt
+            })),
+            ...bookings.map(booking => ({
+                id: booking._id,
+                type: 'booking',
+                customerName: booking.customerName || booking.user?.name || 'Customer',
+                title: `${booking.workerRole || 'Service'}${booking.workerName ? ' by ' + booking.workerName : ''}`,
+                rating: booking.review.rating,
+                text: booking.review.text,
+                images: booking.review.images || [],
+                reviewedAt: booking.review.reviewedAt
+            }))
+        ].sort((a, b) => new Date(b.reviewedAt) - new Date(a.reviewedAt)).slice(0, 12);
+        res.json(reviews);
+    } catch (err) { res.status(500).json({ message: 'Server error' }); }
+});
+
 // ===== GLOBAL SEARCH =====
 app.get('/api/search', async (req, res) => {
     const q = req.query.q;
@@ -299,7 +429,8 @@ app.post('/api/contact', async (req, res) => {
     if (!validateEmail(email)) return res.status(400).json({ success: false, message: 'Invalid email address' });
     try {
         // Save to database
-        await ContactMessage.create({ name: name.trim(), email: email.trim(), phone: phone || '', subject: subject || 'General Inquiry', message });
+        const contactMessage = await ContactMessage.create({ name: name.trim(), email: email.trim(), phone: phone || '', subject: subject || 'General Inquiry', message });
+        io.emit('newContactMessage', contactMessage);
         
         // Send email if configured
         if (process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.EMAIL_PASS !== 'your-app-password') {
@@ -342,6 +473,32 @@ app.get('/api/orders', protect, async (req, res) => {
     } catch (err) { res.status(500).json({ message: 'Server error' }); }
 });
 
+app.post('/api/orders/:id/review', protect, async (req, res) => {
+    try {
+        const { rating, text, images } = req.body;
+        const safeRating = Number(rating);
+        if (!safeRating || safeRating < 1 || safeRating > 5) {
+            return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5' });
+        }
+        const order = await Order.findOne({ _id: req.params.id, user: req.user._id });
+        if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+        if (order.status !== 'Delivered') {
+            return res.status(400).json({ success: false, message: 'Review is available after delivery' });
+        }
+        if (order.review && order.review.reviewedAt) {
+            return res.status(400).json({ success: false, message: 'Review already submitted' });
+        }
+        order.review = {
+            rating: safeRating,
+            text: (text || '').trim(),
+            images: Array.isArray(images) ? images.slice(0, 3) : [],
+            reviewedAt: new Date()
+        };
+        await order.save();
+        res.json({ success: true, order });
+    } catch (err) { res.status(400).json({ success: false, message: err.message }); }
+});
+
 // ===============================================
 // BOOKING ROUTES (Protected)
 // ===============================================
@@ -351,8 +508,8 @@ app.post('/api/bookings', protect, async (req, res) => {
         const customerName = req.body.customerName || req.body.name;
         const customerPhone = req.body.customerPhone || req.body.phone;
         const customerLocation = req.body.customerLocation || req.body.location || req.body.address || req.body.workLocation;
-        if (!customerName || !customerPhone || !customerLocation || !date || !timeSlot) {
-            return res.status(400).json({ success: false, message: 'Name, phone, location, date and time slot are required' });
+        if (!customerName || !customerPhone || !customerLocation || !date || !timeSlot || !workerRole) {
+            return res.status(400).json({ success: false, message: 'Name, phone, location, service, date and time slot are required' });
         }
         const booking = await Booking.create({
             user: req.user._id,
@@ -376,6 +533,32 @@ app.get('/api/bookings', protect, async (req, res) => {
         const bookings = await Booking.find({ user: req.user._id }).sort({ createdAt: -1 });
         res.json(bookings);
     } catch (err) { res.status(500).json({ message: 'Server error' }); }
+});
+
+app.post('/api/bookings/:id/review', protect, async (req, res) => {
+    try {
+        const { rating, text, images } = req.body;
+        const safeRating = Number(rating);
+        if (!safeRating || safeRating < 1 || safeRating > 5) {
+            return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5' });
+        }
+        const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id });
+        if (!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
+        if (booking.status !== 'Completed') {
+            return res.status(400).json({ success: false, message: 'Review is available after service completion' });
+        }
+        if (booking.review && booking.review.reviewedAt) {
+            return res.status(400).json({ success: false, message: 'Review already submitted' });
+        }
+        booking.review = {
+            rating: safeRating,
+            text: (text || '').trim(),
+            images: Array.isArray(images) ? images.slice(0, 3) : [],
+            reviewedAt: new Date()
+        };
+        await booking.save();
+        res.json({ success: true, booking });
+    } catch (err) { res.status(400).json({ success: false, message: err.message }); }
 });
 
 // ===============================================
@@ -467,6 +650,41 @@ app.delete('/api/admin/categories/:id', protect, admin, async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: 'Server error' }); }
 });
 
+// Interior Design Categories CRUD
+app.get('/api/admin/interiors', protect, admin, async (req, res) => {
+    try {
+        await ensureDefaultInteriors();
+        const interiors = await InteriorCategory.find({}).sort({ sortOrder: 1, createdAt: -1 });
+        res.json(interiors);
+    } catch (err) { res.status(500).json({ message: 'Server error' }); }
+});
+
+app.post('/api/admin/interiors', protect, admin, async (req, res) => {
+    try {
+        const interior = await InteriorCategory.create(req.body);
+        res.status(201).json({ success: true, interior });
+    } catch (err) { res.status(400).json({ success: false, message: err.message }); }
+});
+
+app.put('/api/admin/interiors/:id', protect, admin, async (req, res) => {
+    try {
+        const payload = { ...req.body };
+        if (payload.name && !payload.slug) {
+            payload.slug = payload.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        }
+        const interior = await InteriorCategory.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
+        if (!interior) return res.status(404).json({ success: false, message: 'Interior category not found' });
+        res.json({ success: true, interior });
+    } catch (err) { res.status(400).json({ success: false, message: err.message }); }
+});
+
+app.delete('/api/admin/interiors/:id', protect, admin, async (req, res) => {
+    try {
+        await InteriorCategory.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'Interior category removed' });
+    } catch (err) { res.status(500).json({ success: false, message: 'Server error' }); }
+});
+
 // Admin Stats
 app.get('/api/admin/stats', protect, admin, async (req, res) => {
     try {
@@ -500,6 +718,63 @@ app.patch('/api/admin/orders/:id/status', protect, admin, async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: 'Server error' }); }
 });
 
+app.get('/api/admin/reviews', protect, admin, async (req, res) => {
+    try {
+        const [orders, bookings] = await Promise.all([
+            Order.find({ 'review.reviewedAt': { $exists: true } })
+                .populate('user', 'name email phone')
+                .sort({ 'review.reviewedAt': -1 })
+                .lean(),
+            Booking.find({ 'review.reviewedAt': { $exists: true } })
+                .populate('user', 'name email phone')
+                .sort({ 'review.reviewedAt': -1 })
+                .lean()
+        ]);
+        const reviews = [
+            ...orders.map(order => ({
+                id: order._id,
+                type: 'order',
+                customerName: order.shippingAddress?.name || order.user?.name || 'Customer',
+                customerEmail: order.user?.email || '',
+                subject: (order.items || []).map(item => item.name).filter(Boolean).join(', ') || 'Material Order',
+                rating: order.review.rating,
+                text: order.review.text,
+                images: order.review.images || [],
+                isPublic: !!order.review.isPublic,
+                reviewedAt: order.review.reviewedAt
+            })),
+            ...bookings.map(booking => ({
+                id: booking._id,
+                type: 'booking',
+                customerName: booking.customerName || booking.user?.name || 'Customer',
+                customerEmail: booking.user?.email || '',
+                subject: `${booking.workerRole || 'Service'}${booking.workerName ? ' - ' + booking.workerName : ''}`,
+                rating: booking.review.rating,
+                text: booking.review.text,
+                images: booking.review.images || [],
+                isPublic: !!booking.review.isPublic,
+                reviewedAt: booking.review.reviewedAt
+            }))
+        ].sort((a, b) => new Date(b.reviewedAt) - new Date(a.reviewedAt));
+        res.json(reviews);
+    } catch (err) { res.status(500).json({ message: 'Server error' }); }
+});
+
+app.patch('/api/admin/reviews/:type/:id/public', protect, admin, async (req, res) => {
+    try {
+        const isPublic = !!req.body.isPublic;
+        const Model = req.params.type === 'order' ? Order : req.params.type === 'booking' ? Booking : null;
+        if (!Model) return res.status(400).json({ success: false, message: 'Invalid review type' });
+        const item = await Model.findOneAndUpdate(
+            { _id: req.params.id, 'review.reviewedAt': { $exists: true } },
+            { $set: { 'review.isPublic': isPublic } },
+            { new: true }
+        );
+        if (!item) return res.status(404).json({ success: false, message: 'Review not found' });
+        res.json({ success: true, isPublic });
+    } catch (err) { res.status(500).json({ success: false, message: 'Server error' }); }
+});
+
 app.get('/api/admin/bookings', protect, admin, async (req, res) => {
     try {
         const bookings = await Booking.find({})
@@ -530,6 +805,21 @@ app.get('/api/admin/messages', protect, admin, async (req, res) => {
         const messages = await ContactMessage.find({}).sort({ createdAt: -1 });
         res.json(messages);
     } catch (err) { res.status(500).json({ message: 'Server error' }); }
+});
+
+app.patch('/api/admin/messages/:id/read', protect, admin, async (req, res) => {
+    try {
+        const message = await ContactMessage.findByIdAndUpdate(req.params.id, { isRead: !!req.body.isRead }, { new: true });
+        if (!message) return res.status(404).json({ success: false, message: 'Message not found' });
+        res.json({ success: true, message });
+    } catch (err) { res.status(500).json({ success: false, message: 'Server error' }); }
+});
+
+app.delete('/api/admin/messages/:id', protect, admin, async (req, res) => {
+    try {
+        await ContactMessage.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'Message deleted' });
+    } catch (err) { res.status(500).json({ success: false, message: 'Server error' }); }
 });
 
 // ===== SLIDES API =====
@@ -575,7 +865,17 @@ app.get('/{*path}', (req, res) => {
 });
 
 // ===== START =====
-server.listen(PORT, () => {
-    console.log(`\n🚀 Majdoors Backend running on http://localhost:${PORT}`);
-    console.log(`📂 Frontend served from: ${path.join(__dirname, '../frontend')}\n`);
-});
+const startServer = async () => {
+    try {
+        await connectDB();
+        server.listen(PORT, () => {
+            console.log(`Majdoors Backend running on http://localhost:${PORT}`);
+            console.log(`Frontend served from: ${path.join(__dirname, '../frontend')}`);
+        });
+    } catch (err) {
+        console.error('Failed to start server:', err.message);
+        process.exit(1);
+    }
+};
+
+startServer();

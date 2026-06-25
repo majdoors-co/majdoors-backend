@@ -6,6 +6,7 @@ const Worker = require('./models/Worker');
 const Product = require('./models/Product');
 const Category = require('./models/Category');
 const Slide = require('./models/Slide');
+const InteriorCategory = require('./models/InteriorCategory');
 
 const seedDatabase = async () => {
     try {
@@ -19,6 +20,7 @@ const seedDatabase = async () => {
         await Product.deleteMany();
         await Category.deleteMany();
         await Slide.deleteMany();
+        await InteriorCategory.deleteMany();
 
         // Seed Admin
         const salt = await bcrypt.genSalt(12);
@@ -93,6 +95,16 @@ const seedDatabase = async () => {
             { title: 'Hire Verified<br>Professionals', subtitle: 'Book trusted electricians, plumbers, carpenters & more.', img: 'img/slider_services.png', buttonText: 'Book Now →', buttonLink: 'services.html', sortOrder: 4 }
         ]);
         console.log('✅ Slides seeded');
+
+        await InteriorCategory.insertMany([
+            { name: 'Wardrobe Design', slug: 'wardrobe-design', icon: 'fas fa-door-closed', description: 'Sliding, hinged and premium storage ideas for bedrooms.', coverImage: 'img/interior_option_1.png', images: ['img/interior_option_1.png', 'img/interior_option_2.png', 'img/interior_option_3.png'], sortOrder: 1 },
+            { name: 'Modular Kitchen', slug: 'modular-kitchen', icon: 'fas fa-utensils', description: 'Smart kitchen layouts, cabinets and utility-focused finishes.', coverImage: 'img/slider_interior.png', images: ['img/slider_interior.png', 'img/interior_offer.png', 'img/interior_option_2.png'], sortOrder: 2 },
+            { name: 'False Ceiling', slug: 'false-ceiling', icon: 'fas fa-border-top-left', description: 'Modern ceiling concepts with lighting and clean detailing.', coverImage: 'img/interior_offer.png', images: ['img/interior_offer.png', 'img/interior_option_3.png', 'img/slider_interior.png'], sortOrder: 3 },
+            { name: 'Living Room Design', slug: 'living-room-design', icon: 'fas fa-couch', description: 'TV units, wall panels, storage and seating inspiration.', coverImage: 'img/interior_option_2.png', images: ['img/interior_option_2.png', 'img/interior_option_1.png', 'img/interior_offer.png'], sortOrder: 4 },
+            { name: 'Bedroom Interior', slug: 'bedroom-interior', icon: 'fas fa-bed', description: 'Calm bedroom layouts with wardrobes, panels and lighting.', coverImage: 'img/interior_option_3.png', images: ['img/interior_option_3.png', 'img/interior_option_1.png', 'img/slider_interior.png'], sortOrder: 5 },
+            { name: 'Bathroom Vanity', slug: 'bathroom-vanity', icon: 'fas fa-sink', description: 'Compact vanity, mirror and storage ideas for bathrooms.', coverImage: 'img/interior_offer.png', images: ['img/interior_offer.png', 'img/interior_option_2.png'], sortOrder: 6 }
+        ]);
+        console.log('✅ Interior categories seeded');
 
         console.log('🎉 Database Seeding Completed!');
         process.exit(0);

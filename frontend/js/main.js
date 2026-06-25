@@ -5,8 +5,12 @@ let cart = JSON.parse(localStorage.getItem('mj_cart')) || [];
 let workers = [];
 let products = [];
 let slides = [];
+let interiors = [];
+let publicReviews = [];
 let adminBookings = [];
 let adminOrders = [];
+let adminReviews = [];
+let adminMessages = [];
 let notifications = [];
 let socket;
 
@@ -24,9 +28,9 @@ async function loadComponent(elementId, componentPath) {
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Load shared components
     await Promise.all([
-        loadComponent('navbar-container', 'components/navbar.html?v=15'),
-        loadComponent('modals-container', 'components/modals.html?v=15'),
-        loadComponent('footer-container', 'components/footer.html?v=15')
+        loadComponent('navbar-container', 'components/navbar.html?v=23'),
+        loadComponent('modals-container', 'components/modals.html?v=23'),
+        loadComponent('footer-container', 'components/footer.html?v=23')
     ]);
 
     document.body.style.display = 'block';
@@ -38,13 +42,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof api.getSlides === 'function') {
             slides = await api.getSlides();
         }
+        if (typeof api.getInteriors === 'function') {
+            interiors = await api.getInteriors();
+        }
+        if (typeof api.getPublicReviews === 'function') {
+            publicReviews = await api.getPublicReviews();
+        }
     } catch (e) {
         console.error("Backend not reachable. Is server running on port 3000?", e);
     }
 
     // 3. Socket.io
     try {
-        socket = io(window.location.origin);
+        socket = io(typeof API_ORIGIN !== 'undefined' ? API_ORIGIN : window.location.origin);
         socket.on('workerStatusUpdate', (updatedWorkers) => {
             workers = updatedWorkers;
             if (typeof renderServicesPage === 'function') renderServicesPage();
@@ -62,6 +72,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await loadAdminOrders();
                 if (typeof fetchAdminStats === 'function') fetchAdminStats();
                 if (typeof showToast === 'function') showToast('New order received', 'info');
+            }
+        });
+        socket.on('newContactMessage', async () => {
+            if (isAdmin && typeof loadAdminMessages === 'function') {
+                await loadAdminMessages();
+                if (typeof fetchAdminStats === 'function') fetchAdminStats();
+                if (typeof showToast === 'function') showToast('New contact message received', 'info');
             }
         });
         socket.on('orderStatusUpdate', (order) => {
@@ -94,9 +111,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 5. Page-specific init
     const page = document.querySelector('main')?.dataset.page;
-    if (page === 'index') { initHomeSlider(); animateCounters(); initScrollReveal(); }
+    if (page === 'index') { initHomeSlider(); renderPublicReviews(); animateCounters(); initScrollReveal(); }
     if (page === 'services') { applyServiceFilter(); renderServicesPage(); }
     if (page === 'mart') { applyMartFilter(); renderMartPage('all'); initCategoryChips(); }
+    if (page === 'interiors') renderInteriorsPage();
     if (page === 'admin') initAdminPage();
     if (page === 'checkout') renderCheckoutPage();
     if (page === 'orders') renderOrdersPage();

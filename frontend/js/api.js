@@ -1,4 +1,41 @@
-const API_BASE = window.location.origin + '/api';
+const API_BASE = (() => {
+    const configuredBase =
+        window.MAJDOORS_API_BASE ||
+        document.querySelector('meta[name="api-base"]')?.content ||
+        localStorage.getItem('mj_api_base');
+    const base = (configuredBase || window.location.origin).replace(/\/+$/, '');
+    return base.endsWith('/api') ? base : `${base}/api`;
+})();
+const API_ORIGIN = API_BASE.replace(/\/api$/, '');
+
+const REQUEST_TIMEOUT_MS = 25000;
+
+async function apiRequest(path, options = {}) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+        const res = await fetch(`${API_BASE}${path}`, {
+            ...options,
+            signal: controller.signal
+        });
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+
+        if (!res.ok) {
+            throw new Error(data.message || `Request failed with status ${res.status}`);
+        }
+
+        return data;
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            throw new Error('Server took too long to respond. Please try again.');
+        }
+        throw err;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
 
 const getHeaders = () => {
     const user = JSON.parse(localStorage.getItem('mj_user'));
@@ -11,12 +48,10 @@ const getHeaders = () => {
 const api = {
     // Auth
     login: async (email, password) => {
-        const res = await fetch(`${API_BASE}/auth/login`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ email, password }) });
-        return res.json();
+        return apiRequest('/auth/login', { method: 'POST', headers: getHeaders(), body: JSON.stringify({ email, password }) });
     },
     register: async (userData) => {
-        const res = await fetch(`${API_BASE}/auth/register`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(userData) });
-        return res.json();
+        return apiRequest('/auth/register', { method: 'POST', headers: getHeaders(), body: JSON.stringify(userData) });
     },
 
     // Public
@@ -24,6 +59,8 @@ const api = {
     getProducts: async () => { const res = await fetch(`${API_BASE}/products`); return res.json(); },
     getCategories: async () => { const res = await fetch(`${API_BASE}/categories`); return res.json(); },
     getSlides: async () => { const res = await fetch(`${API_BASE}/slides`); return res.json(); },
+    getInteriors: async () => { const res = await fetch(`${API_BASE}/interiors`); return res.json(); },
+    getPublicReviews: async () => { const res = await fetch(`${API_BASE}/reviews/public`); return res.json(); },
     getWorkerById: async (id) => { const res = await fetch(`${API_BASE}/workers/${id}`); return res.json(); },
     getProductById: async (id) => { const res = await fetch(`${API_BASE}/products/${id}`); return res.json(); },
 
@@ -45,6 +82,10 @@ const api = {
         return res.json();
     },
     getOrders: async () => { const res = await fetch(`${API_BASE}/orders`, { headers: getHeaders() }); return res.json(); },
+    reviewOrder: async (id, review) => {
+        const res = await fetch(`${API_BASE}/orders/${id}/review`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(review) });
+        return res.json();
+    },
 
     // Bookings (Protected)
     createBooking: async (bookingData) => {
@@ -52,6 +93,10 @@ const api = {
         return res.json();
     },
     getBookings: async () => { const res = await fetch(`${API_BASE}/bookings`, { headers: getHeaders() }); return res.json(); },
+    reviewBooking: async (id, review) => {
+        const res = await fetch(`${API_BASE}/bookings/${id}/review`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(review) });
+        return res.json();
+    },
 
     // Admin - Products
     addProduct: async (product) => {
@@ -95,6 +140,21 @@ const api = {
         return res.json();
     },
 
+    // Admin - Interior Categories
+    getAdminInteriors: async () => { const res = await fetch(`${API_BASE}/admin/interiors`, { headers: getHeaders() }); return res.json(); },
+    addInterior: async (interior) => {
+        const res = await fetch(`${API_BASE}/admin/interiors`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(interior) });
+        return res.json();
+    },
+    updateInterior: async (id, updates) => {
+        const res = await fetch(`${API_BASE}/admin/interiors/${id}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(updates) });
+        return res.json();
+    },
+    deleteInterior: async (id) => {
+        const res = await fetch(`${API_BASE}/admin/interiors/${id}`, { method: 'DELETE', headers: getHeaders() });
+        return res.json();
+    },
+
     // Admin - Slides
     getAdminSlides: async () => { const res = await fetch(`${API_BASE}/admin/slides`, { headers: getHeaders() }); return res.json(); },
     addSlide: async (slide) => {
@@ -126,5 +186,18 @@ const api = {
         try { return JSON.parse(text); }
         catch (e) { return { success: false, message: res.status === 404 ? 'Backend route not loaded. Restart npm start.' : (text || 'Update failed') }; }
     },
-    getAdminMessages: async () => { const res = await fetch(`${API_BASE}/admin/messages`, { headers: getHeaders() }); return res.json(); }
+    getAdminReviews: async () => { const res = await fetch(`${API_BASE}/admin/reviews`, { headers: getHeaders() }); return res.json(); },
+    updateAdminReviewPublic: async (type, id, isPublic) => {
+        const res = await fetch(`${API_BASE}/admin/reviews/${type}/${id}/public`, { method: 'PATCH', headers: getHeaders(), body: JSON.stringify({ isPublic }) });
+        return res.json();
+    },
+    getAdminMessages: async () => { const res = await fetch(`${API_BASE}/admin/messages`, { headers: getHeaders() }); return res.json(); },
+    updateAdminMessageRead: async (id, isRead) => {
+        const res = await fetch(`${API_BASE}/admin/messages/${id}/read`, { method: 'PATCH', headers: getHeaders(), body: JSON.stringify({ isRead }) });
+        return res.json();
+    },
+    deleteAdminMessage: async (id) => {
+        const res = await fetch(`${API_BASE}/admin/messages/${id}`, { method: 'DELETE', headers: getHeaders() });
+        return res.json();
+    }
 };

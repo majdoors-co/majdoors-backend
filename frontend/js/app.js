@@ -59,7 +59,7 @@ async function handleLogin() {
         } else {
             showToast(r.message || 'Invalid credentials', 'error');
         }
-    } catch (e) { showToast('Login failed. Is the server running?', 'error'); }
+    } catch (e) { showToast(e.message || 'Login failed. Please try again.', 'error'); }
 }
 
 async function handleRegister() {
@@ -80,7 +80,7 @@ async function handleRegister() {
         } else {
             showToast(r.message || 'Registration failed', 'error');
         }
-    } catch (e) { showToast('Registration failed', 'error'); }
+    } catch (e) { showToast(e.message || 'Registration failed', 'error'); }
 }
 
 async function handleLoginPage() {
@@ -96,7 +96,7 @@ async function handleLoginPage() {
             showToast('Welcome!');
             setTimeout(() => window.location.href = 'index.html', 500);
         } else { showToast(r.message || 'Invalid credentials', 'error'); }
-    } catch (e) { showToast('Login failed', 'error'); }
+    } catch (e) { showToast(e.message || 'Login failed', 'error'); }
 }
 
 async function handleRegisterPage() {
@@ -114,7 +114,7 @@ async function handleRegisterPage() {
             showToast('Account created!');
             setTimeout(() => window.location.href = 'index.html', 500);
         } else { showToast(r.message || 'Failed', 'error'); }
-    } catch (e) { showToast('Failed', 'error'); }
+    } catch (e) { showToast(e.message || 'Failed', 'error'); }
 }
 
 function logout() {
@@ -221,7 +221,7 @@ async function submitContactForm() {
     btn.disabled = true; btn.textContent = 'Sending...';
     try {
         const r = await api.sendContactMessage({ name, email, phone, subject, message });
-        if (r.success) { showToast(r.message || 'Message sent!'); document.getElementById('contactForm').reset(); }
+        if (r.success) { showToast(r.message || 'Message sent to admin!'); document.getElementById('contactForm').reset(); }
         else { showToast(r.message || 'Failed to send', 'error'); }
     } catch (e) { showToast('Network error. Please try again.', 'error'); }
     btn.disabled = false; btn.textContent = 'Send Message';
@@ -327,4 +327,9 @@ async function changeAdminCredentials() {
         } else { showErr(data.message || 'Failed to update credentials'); }
     } catch(e) { showErr('Network error. Please try again.'); }
     btn.disabled = false; btn.textContent = 'Save Changes';
+}
+
+function openInteriorWhatsApp() {
+    const msg = encodeURIComponent('Hi, I want to book interior design consultation.');
+    window.open(`https://wa.me/919279509297?text=${msg}`, '_blank');
 }

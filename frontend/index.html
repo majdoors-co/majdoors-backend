@@ -181,6 +181,30 @@
             </div>
         </div>
 
+        <!-- Interior Design Consultation -->
+        <div class="max-w-7xl mx-auto px-6 mt-12 reveal">
+            <div class="relative overflow-hidden rounded-3xl shadow-2xl min-h-[320px] bg-navy cursor-pointer group"
+                onclick="window.location.href='interiors.html'">
+                <img src="img/interior_offer.png" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 transition duration-700" alt="Interior design consultation">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/20"></div>
+                <div class="relative z-10 p-8 md:p-12 max-w-3xl text-white">
+                    <div class="inline-flex items-center gap-2 bg-white/15 border border-white/20 backdrop-blur px-4 py-2 rounded-full text-sm font-bold mb-6">
+                        <i class="fas fa-couch text-orange"></i> Interior Design Studio
+                    </div>
+                    <h2 class="text-4xl md:text-6xl font-extrabold leading-tight">Home to beautiful interiors</h2>
+                    <p class="text-white/80 text-lg mt-4 max-w-2xl">Wardrobes, modular kitchens, false ceilings and complete home design ideas tailored for your space.</p>
+                    <div class="flex flex-col sm:flex-row gap-3 mt-8">
+                        <button class="bg-rose-500 hover:bg-rose-600 text-white px-7 py-3 rounded-full font-bold tracking-wide" onclick="event.stopPropagation();openInteriorWhatsApp()">
+                            <i class="fab fa-whatsapp"></i> Book Free Consultation
+                        </button>
+                        <button class="bg-white/10 border border-white/30 hover:bg-white/20 text-white px-7 py-3 rounded-full font-bold" onclick="event.stopPropagation();window.location.href='interiors.html'">
+                            Explore Designs <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Image Slider/Carousel -->
         <div class="max-w-7xl mx-auto px-6 mt-20 reveal">
             <h3 class="text-2xl font-bold mb-5"><i class="fas fa-images text-orange"></i> Explore More</h3>
@@ -206,7 +230,7 @@
         <div class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 reveal">
             <div>
                 <h3 class="text-2xl font-bold"><i class="fas fa-star text-orange"></i> What Customers Say</h3>
-                <div class="mt-6 space-y-4">
+                <div class="mt-6 space-y-4" id="publicReviewsGrid">
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex items-center gap-3 mb-3"><img
                                 src="https://randomuser.me/api/portraits/men/36.jpg"
@@ -299,10 +323,10 @@
 
     </main>
     <div id="footer-container"></div>
-    <script src="js/api.js?v=15"></script>
-    <script src="js/main.js?v=15"></script>
-    <script src="js/app.js?v=15"></script>
-    <script src="js/pages.js?v=15"></script>
+    <script src="js/api.js?v=23"></script>
+    <script src="js/main.js?v=23"></script>
+    <script src="js/app.js?v=23"></script>
+    <script src="js/pages.js?v=23"></script>
 </body>
 
 </html>

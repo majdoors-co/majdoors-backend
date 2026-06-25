@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Majdoors | Interior Design Ideas</title>
+<meta name="description" content="Explore interior design categories including wardrobes, modular kitchens, false ceilings and home decor ideas.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<script>tailwind.config={theme:{extend:{colors:{navy:'#0a2540',orange:'#f97316',lightgray:'#f3f4f6'},fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-white text-gray-800 font-sans selection:bg-orange selection:text-white" style="display:none">
+<div id="navbar-container"></div>
+<div id="modals-container"></div>
+<main class="pt-16" data-page="interiors">
+<section class="relative min-h-[420px] flex items-center overflow-hidden">
+<img src="img/interior_offer.png" class="absolute inset-0 w-full h-full object-cover" alt="Interior design">
+<div class="absolute inset-0 bg-black/65"></div>
+<div class="relative z-10 max-w-7xl mx-auto px-6 text-white">
+<p class="inline-flex items-center gap-2 bg-white/15 border border-white/20 backdrop-blur px-4 py-2 rounded-full text-sm font-bold"><i class="fas fa-couch text-orange"></i> Majdoors Interior Studio</p>
+<h1 class="text-4xl md:text-6xl font-extrabold mt-6 max-w-4xl leading-tight">Design ideas for every corner of your home</h1>
+<p class="text-white/80 text-lg mt-4 max-w-2xl">Explore wardrobes, modular kitchens, false ceilings and more. Choose a style you like, then book a free consultation.</p>
+<button onclick="openInteriorWhatsApp()" class="mt-7 bg-rose-500 hover:bg-rose-600 text-white px-8 py-3 rounded-full font-bold"><i class="fab fa-whatsapp"></i> Book Free Consultation</button>
+</div>
+</section>
+
+<section class="max-w-7xl mx-auto px-6 py-12">
+<div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-7">
+<div><h2 class="text-3xl font-extrabold">Interior Design Categories</h2><p class="text-gray-500 mt-1">Tap a category to view more inspiration images.</p></div>
+<button onclick="openInteriorWhatsApp()" class="btn-primary px-6 py-3"><i class="fab fa-whatsapp"></i> Free Consultation</button>
+</div>
+<div id="interiorCategoryGrid" class="grid md:grid-cols-3 gap-6"></div>
+</section>
+</main>
+<div id="footer-container"></div>
+<script src="js/api.js?v=23"></script>
+<script src="js/main.js?v=23"></script>
+<script src="js/app.js?v=23"></script>
+<script src="js/pages.js?v=23"></script>
+</body>
+</html>

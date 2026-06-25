@@ -53,6 +53,18 @@
 <div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Products</th><th>Qty</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminOrderTable"></tbody></table></div>
 </div>
 
+<!-- Review Moderation -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+<div class="flex justify-between items-center gap-3 mb-5"><h3 class="font-bold text-lg"><i class="fas fa-star text-yellow-400"></i> Customer Reviews</h3><button onclick="loadAdminReviews()" class="btn-outline px-4 py-2 text-sm"><i class="fas fa-rotate"></i> Refresh</button></div>
+<div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>Customer</th><th>For</th><th>Rating</th><th>Review</th><th>Images</th><th>Public</th></tr></thead><tbody id="adminReviewTable"></tbody></table></div>
+</div>
+
+<!-- Contact Messages -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+<div class="flex justify-between items-center gap-3 mb-5"><h3 class="font-bold text-lg"><i class="fas fa-envelope text-orange"></i> Contact Messages</h3><button onclick="loadAdminMessages()" class="btn-outline px-4 py-2 text-sm"><i class="fas fa-rotate"></i> Refresh</button></div>
+<div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>Customer</th><th>Phone</th><th>Subject</th><th>Message</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminMessageTable"></tbody></table></div>
+</div>
+
 <!-- Product Management -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
 <div class="flex justify-between items-center mb-5"><h3 class="font-bold text-lg"><i class="fas fa-boxes text-orange"></i> Product Management</h3><button onclick="openModal('addProductModal')" class="btn-primary px-4 py-2 text-sm">+ Add Product</button></div>
@@ -70,13 +82,19 @@
 <div class="flex justify-between items-center mb-5"><h3 class="font-bold text-lg"><i class="fas fa-images text-purple-500"></i> Slide Management</h3><button onclick="openModal('addSlideModal')" class="btn-primary px-4 py-2 text-sm">+ Add Slide</button></div>
 <div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>Slide</th><th>Order</th><th>Link/Gallery</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminSlideTable"></tbody></table></div>
 </div>
+
+<!-- Interior Design Management -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+<div class="flex justify-between items-center mb-5"><h3 class="font-bold text-lg"><i class="fas fa-couch text-orange"></i> Interior Design Gallery</h3><button onclick="openModal('addInteriorModal')" class="btn-primary px-4 py-2 text-sm">+ Add Interior Category</button></div>
+<div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>Category</th><th>Cover</th><th>Images</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminInteriorTable"></tbody></table></div>
+</div>
 </div>
 
     </main>
     <div id="footer-container"></div>
-    <script src="js/api.js?v=15"></script>
-    <script src="js/main.js?v=15"></script>
-    <script src="js/app.js?v=15"></script>
-    <script src="js/pages.js?v=15"></script>
+    <script src="js/api.js?v=23"></script>
+    <script src="js/main.js?v=23"></script>
+    <script src="js/app.js?v=23"></script>
+    <script src="js/pages.js?v=23"></script>
 </body>
 </html>
